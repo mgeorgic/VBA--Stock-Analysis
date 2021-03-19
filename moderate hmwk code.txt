@@ -1,0 +1,94 @@
+'START
+Sub StockMarket()
+        
+    'Iterate on every worksheet
+        For Each ws In Worksheets
+        
+        'Definitions
+        Dim ticker As String
+        Dim total_stock_volume, row_end As Long
+        Dim year_open, year_Close, Yearly_Change, Percent_Change As Double
+        Dim iv, row_start As Integer
+        
+        'Summary Table Header Names
+        ws.Range("I1").Value = "ticker"
+        ws.Range("J1").Value = "Yearly_Change"
+        ws.Range("K1").Value = "Percent_Change"
+        ws.Range("L1").Value = "total_stock_volume"
+        
+        'The first value in x = 2 and y = 1
+        iv = 2
+        column_start = 1
+        row_end = ws.Cells(Rows.Count, 1).End(xlUp).Row
+        
+        'Loop through all tickers
+        For i = 2 To row_end
+        
+            'when the ticker value changes down every line in the column
+                If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+        
+                'Initial values location
+                    ticker = ws.Cells(i, 1).Value
+                    year_Close = ws.Cells(i, 6).Value
+            
+            'Check for the non-divisibilty condition (/0) when calculating the 		percent change
+                If (year_open = 0) Then
+                    Percent_Change = 0
+                    Yearly_Change = 0
+            
+            'non-zero value
+                Else
+            
+            'Calculate Yearly_Change and Percent_Change
+                    Yearly_Change = year_Close - year_open
+                    Percent_Change = (year_Close / year_open) / year_Close
+                
+                End If
+
+            'Assign the summary table values
+                    ws.Range("I" & iv).Value = ticker
+                    ws.Range("J" & iv).Value = Yearly_Change
+                    ws.Range("K" & iv).Value = Percent_Change
+                    ws.Range("L" & iv).Value = total_stock_volume
+                    
+            'Format values to $ and %
+                    ws.Range("J" & iv).NumberFormat = "$#.##"
+                    ws.Range("K" & iv).NumberFormat = "0.0%"
+        
+            'Conditional Format for color in Yearly Change
+            'Color Green for positive Yearly Changes
+                If ws.Cells(iv, 10).Value > 0 Then
+                    ws.Cells(iv, 10).Interior.ColorIndex = 10
+            'Color Red for positive Yearly Changes
+                Else
+              ws.Cells(iv, 10).Interior.ColorIndex = 3
+                End If
+        
+            'Reset the row counter. Add one to the iv
+            iv = iv + 1
+            total_stock_volume = 0
+            column_start = 1
+
+        'same ticker name
+        Else
+                
+            'imput values for total stock volume
+            total_stock_volume = total_stock_volume + ws.Cells(i, 7).Value
+
+            
+            'If on first row of new ticker
+                If column_start = 1 Then
+                    year_open = ws.Cells(i, 3).Value
+                End If
+            
+                'Reset counters to continue through ws
+                column_start = column_start = 1
+            
+        End If
+        
+    Next i
+
+    Next ws
+    
+End Sub
+
